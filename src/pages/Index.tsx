@@ -171,12 +171,9 @@ export default function Index() {
         color: "#e8e8e8",
         fontFamily: "'Rajdhani', 'Montserrat', sans-serif",
         transition: "background 1.2s ease",
-        cursor: "pointer",
         overflowX: "hidden",
       }}
     >
-      <CustomCursor color={neon.main} />
-
       {/* VIDEO BG */}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
         <video autoPlay loop muted playsInline
@@ -591,57 +588,5 @@ export default function Index() {
         </div>
       )}
     </div>
-  );
-}
-
-function CustomCursor({ color }: { color: string }) {
-  const ringRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
-  const pos = useRef({ x: 0, y: 0 });
-  const ring = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const move = (e: MouseEvent) => {
-      pos.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("mousemove", move);
-
-    let raf: number;
-    const animate = () => {
-      ring.current.x += (pos.current.x - ring.current.x) * 0.12;
-      ring.current.y += (pos.current.y - ring.current.y) * 0.12;
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate(${ring.current.x - 18}px, ${ring.current.y - 18}px)`;
-      }
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${pos.current.x - 4}px, ${pos.current.y - 4}px)`;
-      }
-      raf = requestAnimationFrame(animate);
-    };
-    raf = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener("mousemove", move);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={ringRef} style={{
-        position: "fixed", top: 0, left: 0, width: 36, height: 36,
-        border: `2px solid ${color}`, borderRadius: "50%",
-        pointerEvents: "none", zIndex: 99999,
-        boxShadow: `0 0 12px ${color}, inset 0 0 6px ${color}22`,
-        transition: "border-color 1.2s ease, box-shadow 1.2s ease"
-      }} />
-      <div ref={dotRef} style={{
-        position: "fixed", top: 0, left: 0, width: 8, height: 8,
-        background: color, borderRadius: "50%",
-        pointerEvents: "none", zIndex: 99999,
-        boxShadow: `0 0 8px ${color}`,
-        transition: "background 1.2s ease, box-shadow 1.2s ease"
-      }} />
-    </>
   );
 }

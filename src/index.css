@@ -100,9 +100,4 @@
     @apply bg-background text-foreground;
     overflow-x: hidden;
   }
-
-  html,
-  body {
-    cursor: none;
-  }
 }

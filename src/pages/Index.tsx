@@ -113,7 +113,7 @@ export default function Index() {
       <div style={{
         position: "fixed", inset: 0, background: "#050505", display: "flex",
         alignItems: "center", justifyContent: "center", flexDirection: "column",
-        fontFamily: "'Rajdhani', 'Montserrat', sans-serif", zIndex: 9999, cursor: "none"
+        fontFamily: "'Rajdhani', 'Montserrat', sans-serif", zIndex: 9999
       }}>
         <div style={{
           position: "absolute", inset: 0,
@@ -142,7 +142,7 @@ export default function Index() {
               style={{
                 background: `linear-gradient(135deg, #0d0d0d 0%, rgba(${s.key === "anarchy" ? "255,60,60" : "57,255,20"},0.08) 100%)`,
                 border: `1px solid ${s.color}44`,
-                borderRadius: 16, padding: "36px 44px", cursor: "none",
+                borderRadius: 16, padding: "36px 44px", cursor: "pointer",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
                 transition: "transform 0.3s ease, box-shadow 0.3s ease",
                 boxShadow: `0 0 30px ${s.glow}`,
@@ -171,7 +171,7 @@ export default function Index() {
         color: "#e8e8e8",
         fontFamily: "'Rajdhani', 'Montserrat', sans-serif",
         transition: "background 1.2s ease",
-        cursor: "none",
+        cursor: "pointer",
         overflowX: "hidden",
       }}
     >
@@ -207,7 +207,7 @@ export default function Index() {
         transition: "border-color 1.2s ease",
       }}>
         <button onClick={() => setServerOverlay(true)} style={{
-          background: "none", border: "none", cursor: "none",
+          background: "none", border: "none", cursor: "pointer",
           fontSize: 20, fontWeight: 900, letterSpacing: "0.15em",
           marginRight: 24, flexShrink: 0
         }}>
@@ -221,7 +221,7 @@ export default function Index() {
               background: activeSection === link ? `${neon.border}` : "none",
               border: activeSection === link ? `1px solid ${neon.border}` : "1px solid transparent",
               borderRadius: 8, color: activeSection === link ? neon.main : "#aaa",
-              padding: "6px 16px", cursor: "none", fontSize: 14, fontWeight: 600,
+              padding: "6px 16px", cursor: "pointer", fontSize: 14, fontWeight: 600,
               letterSpacing: "0.05em", transition: "all 0.2s ease",
               textShadow: activeSection === link ? `0 0 8px ${neon.main}` : "none",
             }}>{link}</button>
@@ -232,7 +232,7 @@ export default function Index() {
           style={{
             background: `${neon.border}`, border: `1px solid ${neon.main}`,
             color: neon.main, borderRadius: 8, padding: "6px 16px",
-            cursor: "none", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em",
+            cursor: "pointer", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em",
             textShadow: `0 0 8px ${neon.main}`, transition: "all 1.2s ease",
             marginRight: 12
           }}>
@@ -241,7 +241,7 @@ export default function Index() {
 
         <button onClick={() => setCartOpen(true)} style={{
           position: "relative", background: "none", border: `1px solid ${neon.border}`,
-          borderRadius: 8, padding: "6px 12px", cursor: "none", color: "#fff"
+          borderRadius: 8, padding: "6px 12px", cursor: "pointer", color: "#fff"
         }}>
           <Icon name="ShoppingCart" size={20} />
           {totalItems > 0 && (
@@ -295,7 +295,7 @@ export default function Index() {
               <span style={{ color: "#666", fontSize: 12, letterSpacing: "0.1em" }}>СЕРВЕР</span>
               <span style={{ color: "#fff", fontSize: 16, fontWeight: 700, margin: "0 12px" }}>mc.gamai.club</span>
               <button onClick={() => navigator.clipboard.writeText("mc.gamai.club")} style={{
-                background: "none", border: "none", color: neon.main, cursor: "none"
+                background: "none", border: "none", color: neon.main, cursor: "pointer"
               }}>
                 <Icon name="Copy" size={14} />
               </button>
@@ -304,14 +304,14 @@ export default function Index() {
             <div style={{ display: "flex", gap: 16, marginBottom: 56, flexWrap: "wrap", justifyContent: "center" }}>
               <button onClick={() => setActiveSection("Товары")} style={{
                 background: neon.main, color: "#000", border: "none", borderRadius: 10,
-                padding: "14px 32px", fontSize: 15, fontWeight: 800, cursor: "none",
+                padding: "14px 32px", fontSize: 15, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "0.1em", boxShadow: `0 0 24px ${neon.glow}`,
                 transition: "all 1.2s ease"
               }}>МАГАЗИН</button>
               <button onClick={() => setActiveSection("О проекте")} style={{
                 background: "none", color: "#fff", border: `1px solid #444`,
                 borderRadius: 10, padding: "14px 32px", fontSize: 15, fontWeight: 700,
-                cursor: "none", letterSpacing: "0.1em"
+                cursor: "pointer", letterSpacing: "0.1em"
               }}>О ПРОЕКТЕ</button>
             </div>
 
@@ -363,7 +363,7 @@ export default function Index() {
                   }} style={{
                     width: "100%", background: neon.main, color: "#000",
                     border: "none", borderRadius: 8, padding: "12px",
-                    fontSize: 14, fontWeight: 800, cursor: "none", letterSpacing: "0.05em",
+                    fontSize: 14, fontWeight: 800, cursor: "pointer", letterSpacing: "0.05em",
                     boxShadow: `0 0 16px ${neon.glow}`, transition: "all 1.2s ease"
                   }}>
                     {item.type === "privilege" ? "Выбрать срок" : "Купить"}
@@ -431,7 +431,7 @@ export default function Index() {
                 }}>
                   <button onClick={() => setOpenRule(openRule === i ? null : i)} style={{
                     width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "18px 24px", background: "none", border: "none", cursor: "none",
+                    padding: "18px 24px", background: "none", border: "none", cursor: "pointer",
                     color: "#fff", fontSize: 16, fontWeight: 700, letterSpacing: "0.05em"
                   }}>
                     <span>{rule.title}</span>
@@ -469,7 +469,7 @@ export default function Index() {
                 <div key={c.label} style={{
                   background: neon.card, border: `1px solid ${neon.border}`,
                   borderRadius: 14, padding: "24px", display: "flex", alignItems: "center", gap: 16,
-                  transition: "border-color 1.2s ease", cursor: "none"
+                  transition: "border-color 1.2s ease", cursor: "pointer"
                 }}>
                   <div style={{ color: neon.main, flexShrink: 0 }}><Icon name={c.icon} size={28} /></div>
                   <div>
@@ -498,7 +498,7 @@ export default function Index() {
               padding: "20px 24px", borderBottom: `1px solid ${neon.border}`
             }}>
               <span style={{ fontSize: 18, fontWeight: 800, color: "#fff", letterSpacing: "0.1em" }}>КОРЗИНА</span>
-              <button onClick={() => setCartOpen(false)} style={{ background: "none", border: "none", color: "#888", cursor: "none" }}>
+              <button onClick={() => setCartOpen(false)} style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}>
                 <Icon name="X" size={20} />
               </button>
             </div>
@@ -522,7 +522,7 @@ export default function Index() {
                         </div>
                       </div>
                       <div style={{ fontSize: 15, fontWeight: 700, color: neon.main }}>{item.price} ₽</div>
-                      <button onClick={() => removeFromCart(item.id)} style={{ background: "none", border: "none", color: "#444", cursor: "none" }}>
+                      <button onClick={() => removeFromCart(item.id)} style={{ background: "none", border: "none", color: "#444", cursor: "pointer" }}>
                         <Icon name="Trash2" size={14} />
                       </button>
                     </div>
@@ -536,7 +536,7 @@ export default function Index() {
                   <button style={{
                     width: "100%", background: neon.main, color: "#000",
                     border: "none", borderRadius: 10, padding: "14px",
-                    fontSize: 15, fontWeight: 800, cursor: "none", letterSpacing: "0.05em",
+                    fontSize: 15, fontWeight: 800, cursor: "pointer", letterSpacing: "0.05em",
                     boxShadow: `0 0 20px ${neon.glow}`
                   }}>ОФОРМИТЬ ЗАКАЗ</button>
                 </div>
@@ -558,7 +558,7 @@ export default function Index() {
             borderRadius: 20, padding: 36, width: "100%", maxWidth: 480, position: "relative"
           }}>
             <button onClick={() => setModalItem(null)} style={{
-              position: "absolute", top: 16, right: 16, background: "none", border: "none", color: "#555", cursor: "none"
+              position: "absolute", top: 16, right: 16, background: "none", border: "none", color: "#555", cursor: "pointer"
             }}><Icon name="X" size={20} /></button>
             <div style={{ fontSize: 56, marginBottom: 12 }}>{modalItem.icon}</div>
             <h3 style={{ fontSize: 26, fontWeight: 900, color: "#fff", marginBottom: 8 }}>{modalItem.name}</h3>
@@ -568,7 +568,7 @@ export default function Index() {
                 <button key={d.key} onClick={() => setSelectedDuration(d.key)} style={{
                   background: selectedDuration === d.key ? neon.main : neon.card,
                   border: `1px solid ${selectedDuration === d.key ? neon.main : neon.border}`,
-                  borderRadius: 10, padding: "14px", cursor: "none",
+                  borderRadius: 10, padding: "14px", cursor: "pointer",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                   transition: "all 0.2s ease"
                 }}>
@@ -582,7 +582,7 @@ export default function Index() {
             <button onClick={() => addToCart(modalItem, selectedDuration)} style={{
               width: "100%", background: neon.main, color: "#000",
               border: "none", borderRadius: 10, padding: "16px",
-              fontSize: 15, fontWeight: 800, cursor: "none", letterSpacing: "0.05em",
+              fontSize: 15, fontWeight: 800, cursor: "pointer", letterSpacing: "0.05em",
               boxShadow: `0 0 24px ${neon.glow}`
             }}>
               В КОРЗИНУ — {Math.round(modalItem.basePrice * (DURATION_MULTIPLIERS.find(d => d.key === selectedDuration)?.mult || 1))} ₽

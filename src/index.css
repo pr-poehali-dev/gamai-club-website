@@ -101,7 +101,8 @@
     overflow-x: hidden;
   }
 
-  * {
-    cursor: none !important;
+  html,
+  body {
+    cursor: none;
   }
 }

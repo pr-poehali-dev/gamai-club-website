@@ -116,7 +116,7 @@ export default function Index() {
         fontFamily: "'Rajdhani', 'Montserrat', sans-serif", zIndex: 9999
       }}>
         <div style={{
-          position: "absolute", inset: 0,
+          position: "absolute", inset: 0, pointerEvents: "none",
           background: "radial-gradient(ellipse at 50% 40%, rgba(57,255,20,0.08) 0%, rgba(255,60,60,0.08) 60%, transparent 80%)"
         }} />
         <div style={{

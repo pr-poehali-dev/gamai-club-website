@@ -53,10 +53,16 @@ const DURATION_MULTIPLIERS = [
 
 const NAVLINKS = ["Главная", "Товары", "О проекте", "Правила", "Контакты"];
 
-// Видео по теме для каждого режима
-const VIDEOS = {
+// Фоновые видео по теме для каждого режима (зацикленное)
+const BG_VIDEOS = {
   anarchy: "https://cdn.pixabay.com/video/2021/08/03/83912-582820496_large.mp4",
   classic: "https://cdn.pixabay.com/video/2020/07/27/46033-444590843_large.mp4",
+};
+
+// Трейлеры для просмотра в модалке
+const TRAILER_VIDEOS = {
+  anarchy: "https://www.youtube.com/embed/5kgGDPiDvak?autoplay=1",
+  classic: "https://www.youtube.com/embed/MmB9b5njVbA?autoplay=1",
 };
 
 export default function Index() {
@@ -70,6 +76,7 @@ export default function Index() {
   const [openRule, setOpenRule] = useState<number | null>(null);
   const [serverOverlay, setServerOverlay] = useState(true);
   const [overlayPaused, setOverlayPaused] = useState(false);
+  const [videoModal, setVideoModal] = useState(false);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Автосмена ТОЛЬКО на оверлее выбора сервера
@@ -182,7 +189,6 @@ export default function Index() {
 
   const currentServer = server!;
   const rules = currentServer === "anarchy" ? RULES_ANARCHY : RULES_CLASSIC;
-  const videoSrc = VIDEOS[currentServer];
 
   return (
     <div style={{
@@ -197,7 +203,7 @@ export default function Index() {
       <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
         <video key={currentServer} autoPlay loop muted playsInline
           style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.2 }}>
-          <source src={videoSrc} type="video/mp4" />
+          <source src={BG_VIDEOS[currentServer]} type="video/mp4" />
         </video>
         <div style={{
           position: "absolute", inset: 0,
@@ -318,17 +324,20 @@ export default function Index() {
             </div>
 
             <div style={{ display: "flex", gap: 16, marginBottom: 56, flexWrap: "wrap", justifyContent: "center" }}>
-              <button onClick={() => setActiveSection("Товары")} style={{
+              <button onClick={() => setActiveSection("Начать")} style={{
                 background: neon.main, color: "#000", border: "none", borderRadius: 10,
                 padding: "14px 32px", fontSize: 15, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "0.1em", boxShadow: `0 0 24px ${neon.glow}`,
                 transition: "all 1.2s ease"
-              }}>МАГАЗИН</button>
-              <button onClick={() => setActiveSection("О проекте")} style={{
+              }}>▶ НАЧАТЬ</button>
+              <button onClick={() => setVideoModal(true)} style={{
                 background: "none", color: "#fff", border: `1px solid #444`,
                 borderRadius: 10, padding: "14px 32px", fontSize: 15, fontWeight: 700,
-                cursor: "pointer", letterSpacing: "0.1em"
-              }}>О ПРОЕКТЕ</button>
+                cursor: "pointer", letterSpacing: "0.1em",
+                display: "flex", alignItems: "center", gap: 8
+              }}>
+                <Icon name="Play" size={16} /> ВИДЕО
+              </button>
             </div>
 
             <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
@@ -338,6 +347,88 @@ export default function Index() {
                   <div style={{ fontSize: 12, color: "#555", letterSpacing: "0.15em", marginTop: 4 }}>{label}</div>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* START */}
+        {activeSection === "Начать" && (
+          <section style={{ maxWidth: 860, margin: "0 auto", padding: "60px 24px" }}>
+            <button onClick={() => setActiveSection("Главная")} style={{
+              background: "none", border: "none", color: "#555", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6, fontSize: 13, marginBottom: 32
+            }}>
+              <Icon name="ArrowLeft" size={16} /> Назад
+            </button>
+
+            <h2 style={{ fontSize: 36, fontWeight: 900, color: "#fff", marginBottom: 8, letterSpacing: "0.1em" }}>
+              КАК <span style={{ color: neon.main, textShadow: `0 0 16px ${neon.main}` }}>НАЧАТЬ ИГРАТЬ</span>
+            </h2>
+            <p style={{ color: "#555", fontSize: 14, marginBottom: 48 }}>
+              {currentServer === "anarchy" ? "💀 Анархия" : "🌲 Классика"} · mc.gamai.club · 1.21.1
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 48 }}>
+              {[
+                { num: "01", title: "Скачай лаунчер", desc: "Загрузи наш лаунчер — он автоматически установит нужную версию Minecraft и все моды. Работает на Windows, macOS и Linux.", icon: "Download" },
+                { num: "02", title: "Войди в аккаунт", desc: "Запусти лаунчер и авторизуйся через свой аккаунт. Если аккаунта нет — регистрация прямо в лаунчере, бесплатно.", icon: "LogIn" },
+                { num: "03", title: "Выбери режим", desc: currentServer === "anarchy" ? "Выбери режим «Анархия» — никаких правил, выживает сильнейший. Готовься к жёсткому PvP." : "Выбери режим «Классика» — дружное комьюнити, честное выживание, своя экономика.", icon: "Gamepad2" },
+                { num: "04", title: "Подключись к серверу", desc: "В меню «Мультиплеер» добавь сервер: mc.gamai.club — и нажми «Войти». Тебя ждут тысячи игроков!", icon: "Wifi" },
+              ].map((step) => (
+                <div key={step.num} style={{
+                  background: neon.card, border: `1px solid ${neon.border}`,
+                  borderRadius: 16, padding: "24px 28px",
+                  display: "flex", alignItems: "flex-start", gap: 24,
+                  transition: "border-color 1.2s ease"
+                }}>
+                  <div style={{
+                    fontSize: 13, fontWeight: 900, color: neon.main,
+                    opacity: 0.4, letterSpacing: "0.1em", flexShrink: 0, paddingTop: 4
+                  }}>{step.num}</div>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12,
+                    background: `${neon.main}18`, border: `1px solid ${neon.border}`,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+                  }}>
+                    <Icon name={step.icon} size={20} style={{ color: neon.main }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: "#fff", marginBottom: 6, letterSpacing: "0.05em" }}>{step.title}</div>
+                    <div style={{ fontSize: 14, color: "#777", lineHeight: 1.6 }}>{step.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              background: `linear-gradient(135deg, ${neon.card} 0%, ${neon.main}10 100%)`,
+              border: `1px solid ${neon.main}55`,
+              borderRadius: 20, padding: "36px 40px",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 20, textAlign: "center"
+            }}>
+              <div style={{ fontSize: 48 }}>🚀</div>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: "#fff", marginBottom: 8 }}>Готов начать?</div>
+                <div style={{ fontSize: 14, color: "#666", lineHeight: 1.7, maxWidth: 400 }}>
+                  Скачай лаунчер, установи и через 5 минут ты уже на сервере. Бесплатно.
+                </div>
+              </div>
+              <a
+                href="https://tlauncher.org/en/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: neon.main, color: "#000",
+                  borderRadius: 12, padding: "16px 40px",
+                  fontSize: 16, fontWeight: 900, cursor: "pointer", letterSpacing: "0.1em",
+                  boxShadow: `0 0 32px ${neon.glow}`, textDecoration: "none",
+                  display: "flex", alignItems: "center", gap: 10,
+                  transition: "all 1.2s ease"
+                }}>
+                <Icon name="Download" size={20} />
+                СКАЧАТЬ ЛАУНЧЕР
+              </a>
+              <div style={{ fontSize: 12, color: "#444" }}>TLauncher · Бесплатно · Windows / macOS / Linux</div>
             </div>
           </section>
         )}
@@ -632,6 +723,48 @@ export default function Index() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* VIDEO MODAL */}
+      {videoModal && (
+        <div onClick={() => setVideoModal(false)} style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 400,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+          backdropFilter: "blur(12px)"
+        }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            width: "100%", maxWidth: 860, position: "relative"
+          }}>
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              marginBottom: 16
+            }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: neon.main, letterSpacing: "0.1em", textShadow: `0 0 10px ${neon.main}` }}>
+                {currentServer === "anarchy" ? "💀 ТРЕЙЛЕР АНАРХИИ" : "🌲 ТРЕЙЛЕР КЛАССИКИ"}
+              </div>
+              <button onClick={() => setVideoModal(false)} style={{
+                background: "none", border: "none", color: "#888", cursor: "pointer"
+              }}>
+                <Icon name="X" size={24} />
+              </button>
+            </div>
+            <div style={{
+              position: "relative", paddingBottom: "56.25%", borderRadius: 16, overflow: "hidden",
+              border: `1px solid ${neon.border}`, boxShadow: `0 0 40px ${neon.glow}`
+            }}>
+              <iframe
+                src={TRAILER_VIDEOS[currentServer]}
+                title="Трейлер сервера"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{
+                  position: "absolute", inset: 0, width: "100%", height: "100%",
+                  border: "none"
+                }}
+              />
+            </div>
           </div>
         </div>
       )}

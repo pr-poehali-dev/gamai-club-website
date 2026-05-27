@@ -53,9 +53,15 @@ const DURATION_MULTIPLIERS = [
 
 const NAVLINKS = ["Главная", "Товары", "О проекте", "Правила", "Контакты"];
 
+// Видео по теме для каждого режима
+const VIDEOS = {
+  anarchy: "https://cdn.pixabay.com/video/2021/08/03/83912-582820496_large.mp4",
+  classic: "https://cdn.pixabay.com/video/2020/07/27/46033-444590843_large.mp4",
+};
+
 export default function Index() {
   const [server, setServer] = useState<Server | null>(null);
-  const [autoSwitch, setAutoSwitch] = useState(true);
+  const [overlayServer, setOverlayServer] = useState<Server>("anarchy");
   const [activeSection, setActiveSection] = useState("Главная");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -63,27 +69,20 @@ export default function Index() {
   const [selectedDuration, setSelectedDuration] = useState("30d");
   const [openRule, setOpenRule] = useState<number | null>(null);
   const [serverOverlay, setServerOverlay] = useState(true);
+  const [overlayPaused, setOverlayPaused] = useState(false);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Автосмена ТОЛЬКО на оверлее выбора сервера
   useEffect(() => {
-    if (!server) return;
-    if (!autoSwitch) return;
+    if (!serverOverlay) return;
+    if (overlayPaused) return;
     autoRef.current = setInterval(() => {
-      setServer((s) => (s === "anarchy" ? "classic" : "anarchy"));
-    }, 10000);
+      setOverlayServer((s) => (s === "anarchy" ? "classic" : "anarchy"));
+    }, 3000);
     return () => { if (autoRef.current) clearInterval(autoRef.current); };
-  }, [autoSwitch, server]);
+  }, [serverOverlay, overlayPaused]);
 
-  const stopAuto = () => {
-    setAutoSwitch(false);
-    if (autoRef.current) clearInterval(autoRef.current);
-  };
-
-  const resumeAuto = () => {
-    setAutoSwitch(true);
-  };
-
-  const isAnarchy = server === "anarchy";
+  const isAnarchy = serverOverlay ? overlayServer === "anarchy" : server === "anarchy";
 
   const neon = isAnarchy
     ? { main: "#ff3c3c", glow: "rgba(255,60,60,0.4)", bg: "#0a0303", card: "#150404", border: "#ff3c3c55", text: "#ff8080" }
@@ -108,44 +107,56 @@ export default function Index() {
 
   const removeFromCart = (id: string) => setCart((p) => p.filter((c) => c.id !== id));
 
+  // Оверлей выбора сервера
   if (serverOverlay) {
+    const overlayNeon = overlayServer === "anarchy"
+      ? { main: "#ff3c3c", glow: "rgba(255,60,60,0.15)", border: "#ff3c3c55" }
+      : { main: "#39ff14", glow: "rgba(57,255,20,0.15)", border: "#39ff1455" };
+
     return (
       <div style={{
         position: "fixed", inset: 0, background: "#050505", display: "flex",
         alignItems: "center", justifyContent: "center", flexDirection: "column",
-        fontFamily: "'Rajdhani', 'Montserrat', sans-serif", zIndex: 9999
+        fontFamily: "'Rajdhani', 'Montserrat', sans-serif",
+        transition: "background 0.8s ease"
       }}>
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "radial-gradient(ellipse at 50% 40%, rgba(57,255,20,0.08) 0%, rgba(255,60,60,0.08) 60%, transparent 80%)"
+          background: `radial-gradient(ellipse at 50% 40%, ${overlayNeon.glow} 0%, transparent 70%)`,
+          transition: "background 0.8s ease"
         }} />
+
         <div style={{
           fontSize: "clamp(36px, 8vw, 80px)", fontWeight: 900, letterSpacing: "0.2em",
           color: "#fff", marginBottom: 8, position: "relative",
           textShadow: "0 0 40px rgba(255,255,255,0.3)"
         }}>
-          <span style={{ color: "#39ff14", textShadow: "0 0 20px #39ff14" }}>GAMAI</span>
+          <span style={{ color: overlayNeon.main, textShadow: `0 0 20px ${overlayNeon.main}`, transition: "all 0.8s ease" }}>GAMAI</span>
           <span style={{ color: "#fff" }}> CLUB</span>
         </div>
+
         <div style={{ color: "#888", fontSize: 16, letterSpacing: "0.3em", marginBottom: 56, textTransform: "uppercase" }}>
           Выбери свой сервер
         </div>
+
         <div style={{ display: "flex", gap: 28, flexWrap: "wrap", justifyContent: "center", padding: "0 20px" }}>
           {[
             { key: "anarchy" as Server, icon: "💀", name: "АНАРХИЯ", desc: "Никаких правил. Выживает сильнейший.", color: "#ff3c3c", glow: "rgba(255,60,60,0.3)" },
             { key: "classic" as Server, icon: "🌲", name: "КЛАССИКА", desc: "Выживание, стройка, дружное комьюнити.", color: "#39ff14", glow: "rgba(57,255,20,0.3)" },
           ].map((s) => (
-            <button key={s.key}
+            <button
+              key={s.key}
               onClick={() => { setServer(s.key); setServerOverlay(false); }}
-              onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-8px) scale(1.03)")}
-              onMouseLeave={e => (e.currentTarget.style.transform = "translateY(0) scale(1)")}
+              onMouseEnter={() => { setOverlayPaused(true); setOverlayServer(s.key); }}
+              onMouseLeave={() => setOverlayPaused(false)}
               style={{
                 background: `linear-gradient(135deg, #0d0d0d 0%, rgba(${s.key === "anarchy" ? "255,60,60" : "57,255,20"},0.08) 100%)`,
-                border: `1px solid ${s.color}44`,
+                border: `2px solid ${overlayServer === s.key ? s.color : s.color + "33"}`,
                 borderRadius: 16, padding: "36px 44px", cursor: "pointer",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                boxShadow: `0 0 30px ${s.glow}`,
+                transition: "all 0.3s ease",
+                boxShadow: overlayServer === s.key ? `0 0 40px ${s.glow}` : `0 0 10px ${s.glow}`,
+                transform: overlayServer === s.key ? "translateY(-8px) scale(1.03)" : "none",
                 minWidth: 220
               }}>
               <div style={{ fontSize: 56 }}>{s.icon}</div>
@@ -155,30 +166,38 @@ export default function Index() {
             </button>
           ))}
         </div>
+
+        <div style={{ marginTop: 48, display: "flex", gap: 8, alignItems: "center" }}>
+          {(["anarchy", "classic"] as Server[]).map((s) => (
+            <div key={s} style={{
+              width: overlayServer === s ? 24 : 8, height: 8, borderRadius: 4,
+              background: overlayServer === s ? overlayNeon.main : "#333",
+              transition: "all 0.4s ease"
+            }} />
+          ))}
+        </div>
       </div>
     );
   }
 
-  const rules = isAnarchy ? RULES_ANARCHY : RULES_CLASSIC;
+  const currentServer = server!;
+  const rules = currentServer === "anarchy" ? RULES_ANARCHY : RULES_CLASSIC;
+  const videoSrc = VIDEOS[currentServer];
 
   return (
-    <div
-      onMouseMove={stopAuto}
-      onMouseLeave={resumeAuto}
-      style={{
-        minHeight: "100vh",
-        background: neon.bg,
-        color: "#e8e8e8",
-        fontFamily: "'Rajdhani', 'Montserrat', sans-serif",
-        transition: "background 1.2s ease",
-        overflowX: "hidden",
-      }}
-    >
+    <div style={{
+      minHeight: "100vh",
+      background: neon.bg,
+      color: "#e8e8e8",
+      fontFamily: "'Rajdhani', 'Montserrat', sans-serif",
+      transition: "background 1.2s ease",
+      overflowX: "hidden",
+    }}>
       {/* VIDEO BG */}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
-        <video autoPlay loop muted playsInline
-          style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.18 }}>
-          <source src="https://cdn.pixabay.com/video/2022/01/08/103849-664065647_large.mp4" type="video/mp4" />
+        <video key={currentServer} autoPlay loop muted playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.2 }}>
+          <source src={videoSrc} type="video/mp4" />
         </video>
         <div style={{
           position: "absolute", inset: 0,
@@ -225,16 +244,16 @@ export default function Index() {
           ))}
         </div>
 
-        <button onClick={() => setServer(isAnarchy ? "classic" : "anarchy")}
-          style={{
-            background: `${neon.border}`, border: `1px solid ${neon.main}`,
-            color: neon.main, borderRadius: 8, padding: "6px 16px",
-            cursor: "pointer", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em",
-            textShadow: `0 0 8px ${neon.main}`, transition: "all 1.2s ease",
-            marginRight: 12
-          }}>
-          {isAnarchy ? "💀 Анархия" : "🌲 Классика"}
-        </button>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: neon.border, border: `1px solid ${neon.main}`,
+          borderRadius: 8, padding: "6px 14px",
+          color: neon.main, fontSize: 13, fontWeight: 700, letterSpacing: "0.1em",
+          textShadow: `0 0 8px ${neon.main}`, transition: "all 1.2s ease",
+          marginRight: 12
+        }}>
+          {currentServer === "anarchy" ? "💀 Анархия" : "🌲 Классика"}
+        </div>
 
         <button onClick={() => setCartOpen(true)} style={{
           position: "relative", background: "none", border: `1px solid ${neon.border}`,
@@ -266,7 +285,7 @@ export default function Index() {
               color: neon.main, letterSpacing: "0.2em", marginBottom: 24,
               textShadow: `0 0 8px ${neon.main}`, transition: "all 1.2s ease",
             }}>
-              {isAnarchy ? "💀 АНАРХИЯ" : "🌲 КЛАССИКА"} · ONLINE
+              {currentServer === "anarchy" ? "💀 АНАРХИЯ" : "🌲 КЛАССИКА"} · ONLINE
             </div>
 
             <h1 style={{
@@ -280,7 +299,7 @@ export default function Index() {
             </h1>
 
             <p style={{ color: "#888", fontSize: 18, marginBottom: 32, letterSpacing: "0.1em" }}>
-              Minecraft {isAnarchy ? "анархия" : "классика"} · Версия 1.21.1
+              Minecraft {currentServer === "anarchy" ? "анархия" : "классика"} · Версия 1.21.1
             </p>
 
             <div style={{
@@ -313,7 +332,7 @@ export default function Index() {
             </div>
 
             <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
-              {[["247", "Онлайн"], ["12 408", "Игроков"], [isAnarchy ? "Анархия" : "Выживание", "Режим"]].map(([val, label], i) => (
+              {[["247", "Онлайн"], ["12 408", "Игроков"], [currentServer === "anarchy" ? "Анархия" : "Выживание", "Режим"]].map(([val, label], i) => (
                 <div key={i} style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 28, fontWeight: 800, color: neon.main, textShadow: `0 0 12px ${neon.main}`, transition: "all 1.2s ease" }}>{val}</div>
                   <div style={{ fontSize: 12, color: "#555", letterSpacing: "0.15em", marginTop: 4 }}>{label}</div>
@@ -330,7 +349,7 @@ export default function Index() {
               <span style={{ color: neon.main, textShadow: `0 0 16px ${neon.main}` }}>МАГАЗИН</span>
             </h2>
             <p style={{ color: "#666", marginBottom: 40, fontSize: 14 }}>
-              Сервер: <strong style={{ color: neon.text }}>{isAnarchy ? "💀 Анархия" : "🌲 Классика"}</strong>
+              Сервер: <strong style={{ color: neon.text }}>{currentServer === "anarchy" ? "💀 Анархия" : "🌲 Классика"}</strong>
             </p>
             <div style={{
               display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20
@@ -338,33 +357,33 @@ export default function Index() {
               {SHOP_ITEMS.map((item) => (
                 <div key={item.id} style={{
                   background: neon.card, border: `1px solid ${neon.border}`,
-                  borderRadius: 14, padding: "28px 24px", position: "relative",
-                  transition: "all 1.2s ease",
+                  borderRadius: 16, padding: 24, position: "relative",
+                  transition: "border-color 1.2s ease"
                 }}>
                   {item.tag && (
-                    <div style={{
-                      position: "absolute", top: 14, right: 14,
-                      background: neon.main, color: "#000", borderRadius: 6,
-                      padding: "2px 10px", fontSize: 11, fontWeight: 800, letterSpacing: "0.1em"
-                    }}>{item.tag}</div>
+                    <span style={{
+                      position: "absolute", top: 16, right: 16,
+                      background: neon.main, color: "#000", fontSize: 10,
+                      fontWeight: 800, padding: "3px 10px", borderRadius: 20, letterSpacing: "0.1em"
+                    }}>{item.tag}</span>
                   )}
-                  <div style={{ fontSize: 44, marginBottom: 12 }}>{item.icon}</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 8 }}>{item.name}</div>
-                  <div style={{ fontSize: 13, color: "#666", marginBottom: 20, lineHeight: 1.5 }}>{item.description}</div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: neon.main, marginBottom: 16, textShadow: `0 0 10px ${neon.main}` }}>
-                    от {item.basePrice} ₽
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>{item.icon}</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 6, letterSpacing: "0.1em" }}>{item.name}</h3>
+                  <p style={{ color: "#666", fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>{item.description}</p>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 22, fontWeight: 900, color: neon.main, textShadow: `0 0 10px ${neon.main}` }}>
+                      {item.basePrice} ₽{item.type === "privilege" ? "/мес" : ""}
+                    </span>
+                    <button
+                      onClick={() => item.type === "privilege" ? setModalItem(item) : addToCart(item)}
+                      style={{
+                        width: "100%", background: neon.main, color: "#000",
+                        border: "none", borderRadius: 8, padding: "12px",
+                        fontSize: 14, fontWeight: 800, cursor: "pointer", letterSpacing: "0.05em",
+                        boxShadow: `0 0 16px ${neon.glow}`, transition: "all 1.2s ease",
+                        marginLeft: 12
+                      }}>Купить</button>
                   </div>
-                  <button onClick={() => {
-                    if (item.type === "privilege") { setModalItem(item); setSelectedDuration("30d"); }
-                    else addToCart(item);
-                  }} style={{
-                    width: "100%", background: neon.main, color: "#000",
-                    border: "none", borderRadius: 8, padding: "12px",
-                    fontSize: 14, fontWeight: 800, cursor: "pointer", letterSpacing: "0.05em",
-                    boxShadow: `0 0 16px ${neon.glow}`, transition: "all 1.2s ease"
-                  }}>
-                    {item.type === "privilege" ? "Выбрать срок" : "Купить"}
-                  </button>
                 </div>
               ))}
             </div>
@@ -417,11 +436,11 @@ export default function Index() {
             <h2 style={{ fontSize: 36, fontWeight: 900, color: "#fff", marginBottom: 8, letterSpacing: "0.1em" }}>
               <span style={{ color: neon.main, textShadow: `0 0 16px ${neon.main}` }}>ПРАВИЛА</span>
             </h2>
-            <p style={{ color: "#666", marginBottom: 40, fontSize: 14 }}>
-              Для сервера: <strong style={{ color: neon.text }}>{isAnarchy ? "💀 Анархия" : "🌲 Классика"}</strong>
+            <p style={{ color: "#555", marginBottom: 40, fontSize: 14 }}>
+              {currentServer === "anarchy" ? "💀 Анархия" : "🌲 Классика"} · Версия 1.21.1
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {rules.map((rule, i) => (
+              {rules.map((section, i) => (
                 <div key={i} style={{
                   background: neon.card, border: `1px solid ${neon.border}`,
                   borderRadius: 12, overflow: "hidden", transition: "border-color 1.2s ease"
@@ -431,15 +450,18 @@ export default function Index() {
                     padding: "18px 24px", background: "none", border: "none", cursor: "pointer",
                     color: "#fff", fontSize: 16, fontWeight: 700, letterSpacing: "0.05em"
                   }}>
-                    <span>{rule.title}</span>
+                    {section.title}
                     <Icon name={openRule === i ? "ChevronUp" : "ChevronDown"} size={18} />
                   </button>
                   {openRule === i && (
-                    <div style={{ padding: "0 24px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
-                      {rule.items.map((r, j) => (
-                        <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: 10, color: "#aaa", fontSize: 14 }}>
-                          <div style={{ width: 6, height: 6, borderRadius: "50%", background: neon.main, marginTop: 5, flexShrink: 0 }} />
-                          {r}
+                    <div style={{ padding: "0 24px 20px" }}>
+                      {section.items.map((rule, j) => (
+                        <div key={j} style={{
+                          display: "flex", alignItems: "flex-start", gap: 10,
+                          padding: "8px 0", borderTop: j === 0 ? `1px solid ${neon.border}` : "none"
+                        }}>
+                          <span style={{ color: neon.main, fontSize: 16, marginTop: 1, flexShrink: 0 }}>›</span>
+                          <span style={{ color: "#aaa", fontSize: 14, lineHeight: 1.5 }}>{rule}</span>
                         </div>
                       ))}
                     </div>
@@ -456,22 +478,28 @@ export default function Index() {
             <h2 style={{ fontSize: 36, fontWeight: 900, color: "#fff", marginBottom: 40, letterSpacing: "0.1em" }}>
               <span style={{ color: neon.main, textShadow: `0 0 16px ${neon.main}` }}>КОНТАКТЫ</span>
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
               {[
-                { icon: "MessageCircle", label: "Discord", val: "discord.gg/gamai" },
-                { icon: "Send", label: "Telegram", val: "@gamai_club" },
-                { icon: "Globe", label: "Сервер", val: "mc.gamai.club" },
-                { icon: "Mail", label: "Email", val: "admin@gamai.club" },
+                { label: "Discord", icon: "MessageCircle", val: "discord.gg/gamai", color: "#5865F2" },
+                { label: "Telegram", icon: "Send", val: "@gamai_club", color: "#26A5E4" },
+                { label: "VK", icon: "Users", val: "vk.com/gamai", color: "#4680C2" },
+                { label: "Email", icon: "Mail", val: "support@gamai.club", color: neon.main },
               ].map((c) => (
                 <div key={c.label} style={{
                   background: neon.card, border: `1px solid ${neon.border}`,
                   borderRadius: 14, padding: "24px", display: "flex", alignItems: "center", gap: 16,
-                  transition: "border-color 1.2s ease", cursor: "pointer"
+                  transition: "border-color 1.2s ease"
                 }}>
-                  <div style={{ color: neon.main, flexShrink: 0 }}><Icon name={c.icon} size={28} /></div>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12, background: `${c.color}22`,
+                    border: `1px solid ${c.color}44`, display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0
+                  }}>
+                    <Icon name={c.icon} size={20} style={{ color: c.color }} />
+                  </div>
                   <div>
-                    <div style={{ fontSize: 12, color: "#555", letterSpacing: "0.1em", marginBottom: 4 }}>{c.label}</div>
-                    <div style={{ fontSize: 15, color: "#fff", fontWeight: 600 }}>{c.val}</div>
+                    <div style={{ fontSize: 12, color: "#555", marginBottom: 4 }}>{c.label}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{c.val}</div>
                   </div>
                 </div>
               ))}
@@ -479,6 +507,71 @@ export default function Index() {
           </section>
         )}
       </main>
+
+      {/* FOOTER */}
+      <footer style={{
+        position: "relative", zIndex: 1,
+        borderTop: `1px solid ${neon.border}`,
+        background: "rgba(0,0,0,0.6)",
+        backdropFilter: "blur(16px)",
+        transition: "border-color 1.2s ease",
+        padding: "40px 32px 24px"
+      }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 40, marginBottom: 40 }}>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: "0.15em", marginBottom: 12 }}>
+                <span style={{ color: neon.main, textShadow: `0 0 10px ${neon.main}` }}>GAMAI</span>
+                <span style={{ color: "#fff" }}> CLUB</span>
+              </div>
+              <p style={{ color: "#555", fontSize: 13, lineHeight: 1.7 }}>
+                Лучший Minecraft сервер с двумя режимами — анархия и классика. Версия 1.21.1.
+              </p>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#555", letterSpacing: "0.2em", marginBottom: 16 }}>РАЗДЕЛЫ</div>
+              {NAVLINKS.map((link) => (
+                <button key={link} onClick={() => setActiveSection(link)} style={{
+                  display: "block", background: "none", border: "none", color: "#666",
+                  fontSize: 14, cursor: "pointer", padding: "4px 0", letterSpacing: "0.05em",
+                  textAlign: "left", transition: "color 0.2s"
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.color = neon.main)}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#666")}
+                >{link}</button>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#555", letterSpacing: "0.2em", marginBottom: 16 }}>СЕРВЕР</div>
+              <div style={{ color: "#666", fontSize: 14, lineHeight: 2 }}>
+                <div>IP: <span style={{ color: neon.main }}>mc.gamai.club</span></div>
+                <div>Версия: <span style={{ color: "#aaa" }}>1.21.1</span></div>
+                <div>Режим: <span style={{ color: "#aaa" }}>{currentServer === "anarchy" ? "💀 Анархия" : "🌲 Классика"}</span></div>
+                <div>TPS: <span style={{ color: neon.main }}>20.0</span></div>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#555", letterSpacing: "0.2em", marginBottom: 16 }}>СООБЩЕСТВО</div>
+              {[["Discord", "MessageCircle", "#5865F2"], ["Telegram", "Send", "#26A5E4"], ["VK", "Users", "#4680C2"]].map(([name, icon, color]) => (
+                <div key={name} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0" }}>
+                  <Icon name={icon} size={16} style={{ color }} />
+                  <span style={{ color: "#666", fontSize: 13 }}>{name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{
+            borderTop: `1px solid ${neon.border}`,
+            paddingTop: 20, display: "flex", justifyContent: "space-between",
+            alignItems: "center", flexWrap: "wrap", gap: 12,
+            transition: "border-color 1.2s ease"
+          }}>
+            <span style={{ color: "#444", fontSize: 12 }}>© 2024 GAMAI CLUB. Все права защищены.</span>
+            <span style={{ color: "#333", fontSize: 12 }}>Не является официальным продуктом Mojang Studios</span>
+          </div>
+        </div>
+      </footer>
 
       {/* CART PANEL */}
       {cartOpen && (
